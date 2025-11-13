@@ -31,7 +31,7 @@ class Program
                 components = TestsCircuit.CreateComplexCircuit();
                 break;
             case "4":
-                components = reader.ReadCircuitFromTxt("test2.txt");
+                components = reader.ReadCircuitFromTxt("testRLC.txt");
                 break;
             case "5":
             default:
@@ -53,7 +53,7 @@ class Program
         }
 
         var simulator = new CircuitSimulator(components);
-        var result = simulator.Simulate(0.01, 0.0001);
+        var result = simulator.Simulate(0.02,  0.00002);
 
         // Создание графиков
         GraphPlotter plotter = new GraphPlotter();

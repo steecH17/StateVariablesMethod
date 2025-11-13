@@ -10,40 +10,39 @@ namespace StateVariablesMethod
     {
         private int width;
         private int height;
-        
+
         public GraphPlotter(int width = 800, int height = 600)
         {
             this.width = width;
             this.height = height;
         }
-        
-        public void PlotAndSave(string filePath, string title, List<DataSeries> dataSeries, 
-                              string xLabel = "Time", string yLabel = "Value")
+
+        public void PlotAndSave(string filePath, string title, List<DataSeries> dataSeries,
+                      string xLabel = "Time", string yLabel = "Value")
         {
             var plot = new Plot();
             plot.Title(title);
             plot.XLabel(xLabel);
             plot.YLabel(yLabel);
-            
+
             for (int i = 0; i < dataSeries.Count; i++)
             {
                 var series = dataSeries[i];
                 if (series.XValues.Length > 0 && series.YValues.Length > 0)
                 {
-                    var scatter = plot.Add.Scatter(series.XValues, series.YValues);
-                    scatter.LegendText = series.Name;
-                    scatter.LineWidth = 2;
-                    scatter.MarkerSize = 5;
-                    
-                    scatter.Color = GetColor(i);
+                    // Используем только маркеры без линий
+                    var sp = plot.Add.ScatterPoints(series.XValues, series.YValues);
+                    sp.LegendText = series.Name;
+                    sp.MarkerSize = 5;
+                    sp.MarkerShape = MarkerShape.FilledCircle;
+                    sp.Color = GetColor(i);
                 }
             }
-            
+
             plot.ShowLegend();
-            
             plot.SavePng(filePath, width, height);
         }
-        
+
         public void PlotCircuitCurrents(string directory, SimulationResult result)
         {
             if (!Directory.Exists(directory))
@@ -52,11 +51,15 @@ namespace StateVariablesMethod
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
             var time = result.Time;
-            // График i2
+
+            // Проверяем размерности
+            Console.WriteLine($"Размерности данных: Time={time?.Length}, Outputs={result.Outputs?.GetLength(1)}, States={result.States?.GetLength(1)}");
+
+            // График i2 (индекс 0 в Outputs)
             var i2Values = new double[time.Length];
             for (int i = 0; i < time.Length; i++)
             {
-                i2Values[i] = result.Outputs[i, 2];
+                i2Values[i] = result.Outputs[i, 0]; // i2 это первый выход (индекс 0)
             }
 
             var i2Series = new DataSeries("i2 (ток через R2)", time, i2Values);
@@ -68,12 +71,12 @@ namespace StateVariablesMethod
                 new List<DataSeries> { i2Series },
                 "Время (s)", "Ток i2 (A)"
             );
-            
-            // График i3
+
+            // График i3 (индекс 1 в Outputs)
             var i3Values = new double[time.Length];
             for (int i = 0; i < time.Length; i++)
             {
-                i3Values[i] = result.Outputs[i, 3];
+                i3Values[i] = result.Outputs[i, 1]; // i3 это второй выход (индекс 1)
             }
 
             var i3Series = new DataSeries("i3 (ток через источник)", time, i3Values);
@@ -94,30 +97,37 @@ namespace StateVariablesMethod
                 new List<DataSeries> { i2Series, i3Series },
                 "Время (s)", "Ток (A)"
             );
-            
-            // Графики переменных состояния
-            var uCValues = new double[time.Length];
-            var iLValues = new double[time.Length];
-            for (int i = 0; i < time.Length; i++)
-            {
-                uCValues[i] = result.States[i, 0]; 
-                iLValues[i] = result.States[i, 1];
-            }
-            
-            var uCSeries = new DataSeries("U_C (напряжение на конденсаторе)", time, uCValues);
-            var iLSeries = new DataSeries("I_L (ток через индуктивность)", time, iLValues);
 
-            plotName = $"states_current_scottplot_{timestamp}.png";
-            PlotAndSave(
-                Path.Combine(directory, plotName),
-                "Переменные состояния схемы",
-                new List<DataSeries> { uCSeries, iLSeries },
-                "Время (s)", "Значение"
-            );
-            
+            // Графики переменных состояния (проверяем, что есть состояния)
+            if (result.States.GetLength(1) >= 2)
+            {
+                var uCValues = new double[time.Length];
+                var iLValues = new double[time.Length];
+                for (int i = 0; i < time.Length; i++)
+                {
+                    uCValues[i] = result.States[i, 0]; // u_C - первое состояние
+                    iLValues[i] = result.States[i, 1]; // i_L - второе состояние
+                }
+
+                var uCSeries = new DataSeries("U_C (напряжение на конденсаторе)", time, uCValues);
+                var iLSeries = new DataSeries("I_L (ток через индуктивность)", time, iLValues);
+
+                plotName = $"states_current_scottplot_{timestamp}.png";
+                PlotAndSave(
+                    Path.Combine(directory, plotName),
+                    "Переменные состояния схемы",
+                    new List<DataSeries> { uCSeries, iLSeries },
+                    "Время (s)", "Значение"
+                );
+            }
+            else
+            {
+                Console.WriteLine("ВНИМАНИЕ: Недостаточно данных о состояниях для построения графиков");
+            }
+
             Console.WriteLine($"Графики ScottPlot сохранены в папке: {directory}");
         }
-        
+
         private Color GetColor(int index)
         {
             var colors = new[]
@@ -131,7 +141,7 @@ namespace StateVariablesMethod
                 ScottPlot.Colors.Magenta,
                 ScottPlot.Colors.Cyan
             };
-            
+
             return colors[index % colors.Length];
         }
     }
