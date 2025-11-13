@@ -49,7 +49,7 @@ public class DirectedGraph
         Chords.AddRange(missingCurrentSources);
         Tree.RemoveAll(c => c.Type == ComponentType.CurrentSource);
 
-        // СОРТИРОВКА ХОРД по правильному порядку: сопротивления → индуктивности → источники тока
+        // сортировка хорд: сопротивления → индуктивности → источники тока
         SortChordsByPriority();
     }
 
@@ -58,7 +58,6 @@ public class DirectedGraph
         var visitedNodes = new HashSet<int>();
         var nodesToVisit = new Queue<int>();
 
-        // Начинаем с одного узла нового компонента
         nodesToVisit.Enqueue(newComponent.Node1);
 
         while (nodesToVisit.Count > 0)
@@ -67,7 +66,6 @@ public class DirectedGraph
 
             if (currentNode == newComponent.Node2)
             {
-                // Нашли путь до второго узла - будет цикл
                 return true;
             }
 
@@ -98,9 +96,9 @@ public class DirectedGraph
         // Порядок приоритета для хорд: Resistance → Inductor → CurrentSource
         var priorityOrder = new List<ComponentType>
     {
-        ComponentType.Resistor,       // 1. Сопротивления
-        ComponentType.Inductor,       // 2. Индуктивности
-        ComponentType.CurrentSource   // 3. Источники тока
+        ComponentType.Resistor,       
+        ComponentType.Inductor,       
+        ComponentType.CurrentSource   
     };
 
         var sortedChords = new List<CircuitComponent>();
