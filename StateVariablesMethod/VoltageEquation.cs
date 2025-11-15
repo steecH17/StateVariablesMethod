@@ -1,7 +1,7 @@
 namespace StateVariablesMethod;
 
-// Вместо KVL Equation
-public class VoltageEquation  // или KonтурноеУравнение
+// KVL Equation
+public class VoltageEquation
 {
     public CircuitComponent Chord { get; set; }
     public string Equation { get; set; }

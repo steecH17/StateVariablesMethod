@@ -1,6 +1,6 @@
 namespace StateVariablesMethod;
-// Вместо KCL Equation  
-public class CurrentEquation  // или УзловоеУравнение
+// KCL Equation  
+public class CurrentEquation 
 {
     public CircuitComponent Component { get; set; }
     public string Equation { get; set; }

@@ -30,7 +30,6 @@ namespace StateVariablesMethod
                 var series = dataSeries[i];
                 if (series.XValues.Length > 0 && series.YValues.Length > 0)
                 {
-                    // Используем только маркеры без линий
                     var sp = plot.Add.ScatterPoints(series.XValues, series.YValues);
                     sp.LegendText = series.Name;
                     sp.MarkerSize = 5;
@@ -52,14 +51,11 @@ namespace StateVariablesMethod
 
             var time = result.Time;
 
-            // Проверяем размерности
-            Console.WriteLine($"Размерности данных: Time={time?.Length}, Outputs={result.Outputs?.GetLength(1)}, States={result.States?.GetLength(1)}");
-
-            // График i2 (индекс 0 в Outputs)
+            // График i2
             var i2Values = new double[time.Length];
             for (int i = 0; i < time.Length; i++)
             {
-                i2Values[i] = result.Outputs[i, 0]; // i2 это первый выход (индекс 0)
+                i2Values[i] = result.Outputs[i, 0];
             }
 
             var i2Series = new DataSeries("i2 (ток через R2)", time, i2Values);
@@ -72,11 +68,11 @@ namespace StateVariablesMethod
                 "Время (s)", "Ток i2 (A)"
             );
 
-            // График i3 (индекс 1 в Outputs)
+            // График i3
             var i3Values = new double[time.Length];
             for (int i = 0; i < time.Length; i++)
             {
-                i3Values[i] = result.Outputs[i, 1]; // i3 это второй выход (индекс 1)
+                i3Values[i] = result.Outputs[i, 1]; 
             }
 
             var i3Series = new DataSeries("i3 (ток через источник)", time, i3Values);
@@ -98,15 +94,15 @@ namespace StateVariablesMethod
                 "Время (s)", "Ток (A)"
             );
 
-            // Графики переменных состояния (проверяем, что есть состояния)
+            // Графики переменных состояния
             if (result.States.GetLength(1) >= 2)
             {
                 var uCValues = new double[time.Length];
                 var iLValues = new double[time.Length];
                 for (int i = 0; i < time.Length; i++)
                 {
-                    uCValues[i] = result.States[i, 0]; // u_C - первое состояние
-                    iLValues[i] = result.States[i, 1]; // i_L - второе состояние
+                    uCValues[i] = result.States[i, 0]; 
+                    iLValues[i] = result.States[i, 1]; 
                 }
 
                 var uCSeries = new DataSeries("U_C (напряжение на конденсаторе)", time, uCValues);
@@ -122,10 +118,10 @@ namespace StateVariablesMethod
             }
             else
             {
-                Console.WriteLine("ВНИМАНИЕ: Недостаточно данных о состояниях для построения графиков");
+                Console.WriteLine("Недостаточно данных о состояниях для построения графиков");
             }
 
-            Console.WriteLine($"Графики ScottPlot сохранены в папке: {directory}");
+            Console.WriteLine($"Графики сохранены в папке: {directory}");
         }
 
         private Color GetColor(int index)

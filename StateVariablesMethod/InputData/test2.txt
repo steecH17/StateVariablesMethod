@@ -1,5 +1,0 @@
-J CurrentSource 10 0 2
-L Inductor 1 2 1
-R1 Resistor 2 1 0
-R2 Resistor 2 2 0
-C Capacitor 3 2 0
